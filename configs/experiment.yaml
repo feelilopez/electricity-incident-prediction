@@ -1,0 +1,24 @@
+project:
+  name: electricity-incident-prediction
+
+data:
+  start_date: "2025-9-01T00:00"
+  end_date: "2025-12-31T23:00"
+  frequency: "h"
+  timezone: "Europe/Madrid"
+
+labeling:
+  seasonal_history_weeks: 8
+  zscore_k: 3.0
+  fallback_window_hours: 168
+
+windowing:
+  past_steps: 168
+  horizon_steps: 24
+
+split:
+  train_end: "2023-12-31T23:00"
+  valid_end: "2024-12-31T23:00"
+
+model:
+  random_state: 42
