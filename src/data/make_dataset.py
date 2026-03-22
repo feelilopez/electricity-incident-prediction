@@ -82,6 +82,15 @@ def main() -> None:
         fallback_window=label_cfg["fallback_window_hours"],
     )
 
+    # Report positive rate for raw rolling-threshold labels (before windowing)
+    label_positive_count = int(labels.sum())
+    label_total = len(labels)
+    label_positive_rate = float(labels.mean()) if label_total else 0.0
+    print(
+        f"Rolling-threshold labels — Positives: {label_positive_count}/{label_total} "
+        f"| Positive rate: {label_positive_rate:.4f}"
+    )
+
     # Each sample uses last p lags and predicts incident occurrence in next n steps.
     supervised = build_supervised_windows(
         demand=s,
@@ -92,10 +101,9 @@ def main() -> None:
 
     # Persist prediction start timestamps in UTC to avoid DST-related ambiguity
     # when reloading the dataset for splitting and training.
-    supervised["timestamp_target_start"] = (
-        pd.to_datetime(supervised["timestamp_target_start"], utc=True)
-        .dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-    )
+    supervised["timestamp_target_start"] = pd.to_datetime(
+        supervised["timestamp_target_start"], utc=True
+    ).dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     PROCESSED_OUT.parent.mkdir(parents=True, exist_ok=True)
     supervised.to_csv(PROCESSED_OUT, index=False)

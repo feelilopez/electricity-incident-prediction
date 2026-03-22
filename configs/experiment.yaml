@@ -2,7 +2,7 @@ project:
   name: electricity-incident-prediction
 
 data:
-  start_date: "2025-9-01T00:00"
+  start_date: "2021-01-01T00:00"
   end_date: "2025-12-31T23:00"
   frequency: "h"
   timezone: "Europe/Madrid"
