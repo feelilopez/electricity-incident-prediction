@@ -1,6 +1,7 @@
 # Electricity Incident Prediction
 
-Brief project to detect short-term high-demand incidents using REE demand data (2021–2025). 
+This project detects high-demand electricity incidents using REE demand data (2021–2025). Using the previous week’s demand, the model predicts whether a high-demand incident will occur in the next few hours. Positive predictions act as alerts that enable proactive resource planning and help prevent possible outages on the grid.
+
 
 Data: raw pulls and processed datasets live under `data/` (see `data/processed/supervised_2021_2025.csv`). Source: [REE API](https://www.ree.es/en/datos/apidata). 
 
@@ -31,12 +32,12 @@ pip install -r requirements.txt
 python -m src.data.make_dataset
 ```
 
-3. Explore the 'EDA' and 'results' notebooks in the `notebooks/` folder.
+3. Explore the '01_EDA' and '02_Results' notebooks in the `notebooks/` folder.
 
 ## Future work
 
 - Try more advanced models.
 - Turn univariate time-series into multivariate by adding features (weather, calendar, holidays).
-- Packaging for periodic runs and simple deployment.
+- Package for periodic runs and simple deployment.
 
-For details and experiments, see the `notebooks/` folder.
+For details, see the `notebooks/` folder.
