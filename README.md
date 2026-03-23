@@ -26,13 +26,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. Build the dataset (produces files in `data/processed/`):
-
-```bash
-python -m src.data.make_dataset
-```
-
-3. Explore the '01_EDA' and '02_Results' notebooks in the `notebooks/` folder.
+2. Run/explore the '01_EDA' and '02_Results' notebooks in the `notebooks/` folder.
 
 ## Future work
 
