@@ -14,7 +14,7 @@ labeling:
 
 windowing:
   past_steps: 168
-  horizon_steps: 24
+  horizon_steps: 6
 
 split:
   train_end: "2023-12-31T23:00"
