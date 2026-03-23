@@ -42,13 +42,50 @@ def fetch_full_range(start_date: str, end_date: str) -> pd.DataFrame:
     return joined
 
 
-def clean_hourly(frame: pd.DataFrame, timezone: str) -> pd.DataFrame:
+def _exclude_periods(
+    data: pd.DataFrame,
+    periods: list[dict] | None,
+    timezone: str,
+) -> pd.DataFrame:
+    if not periods:
+        return data
+
+    filtered = data.copy()
+    removed = 0
+
+    for period in periods:
+        start_raw = period.get("start")
+        end_raw = period.get("end")
+        if start_raw is None or end_raw is None:
+            raise ValueError(
+                "Each excluded period must provide both 'start' and 'end'"
+            )
+
+        start = pd.to_datetime(start_raw, utc=True).tz_convert(timezone)
+        end = pd.to_datetime(end_raw, utc=True).tz_convert(timezone)
+        if start > end:
+            raise ValueError("Excluded period start must be before or equal to end")
+
+        mask = (filtered.index >= start) & (filtered.index <= end)
+        removed += int(mask.sum())
+        filtered = filtered.loc[~mask]
+
+    print(f"Excluded {removed} rows from configured anomaly periods")
+    return filtered
+
+
+def clean_hourly(
+    frame: pd.DataFrame,
+    timezone: str,
+    excluded_periods: list[dict] | None = None,
+) -> pd.DataFrame:
     data = frame.copy()
     # Convert to Spain timezone before reindexing to maintain local-hour seasonality.
     data["datetime"] = pd.to_datetime(data["datetime"], utc=True).dt.tz_convert(
         timezone
     )
     data = data.set_index("datetime").sort_index()
+    data = _exclude_periods(data, periods=excluded_periods, timezone=timezone)
 
     full_index = pd.date_range(
         data.index.min(), data.index.max(), freq="h", tz=timezone
@@ -68,7 +105,11 @@ def main() -> None:
     win_cfg = cfg["windowing"]
 
     raw = fetch_full_range(demand_cfg["start_date"], demand_cfg["end_date"])
-    cleaned = clean_hourly(raw, timezone=demand_cfg["timezone"])
+    cleaned = clean_hourly(
+        raw,
+        timezone=demand_cfg["timezone"],
+        excluded_periods=demand_cfg.get("excluded_periods"),
+    )
 
     RAW_OUT.parent.mkdir(parents=True, exist_ok=True)
     cleaned.to_csv(RAW_OUT, index=False)

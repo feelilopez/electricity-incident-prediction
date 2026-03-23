@@ -83,6 +83,11 @@ pip install -r requirements.txt
 python -m src.data.make_dataset
 ```
 
+To exclude known anomaly windows (for example, the Iberia outage), set
+`data.excluded_periods` in `configs/experiment.yaml` with `start` and `end`
+timestamps. These ranges are removed before hourly interpolation and
+window/label generation.
+
 4. Train baseline models:
 
 ```bash
