@@ -1,113 +1,42 @@
 # Electricity Incident Prediction
 
-Univariate time-series project to predict whether an electricity demand incident will occur in the next `n` steps, using the last `p` steps.
+Brief project to detect short-term high-demand incidents using REE demand data (2021–2025). 
 
-## 1) Problem Definition
+Data: raw pulls and processed datasets live under `data/` (see `data/processed/supervised_2021_2025.csv`). Source: [REE API](https://www.ree.es/en/datos/apidata). 
 
-- Objective: Predict if an incident happens in the next `n` time steps.
-- Input: Last `p` demand values from REE demand series.
-- Output: Binary label (`1` incident, `0` non-incident).
-- Incident definition: Rolling Seasonal Threshold (adaptive threshold based on historical behavior).
+## Repository structure
 
-This project uses REE API data from 2021-2025 to reduce COVID-period distortions.
+- `data/` — raw and processed datasets
+- `notebooks/` — EDA and result notebooks
+- `src/` — data ingestion, labeling, feature and model code
+- `configs/` — experiment settings
 
-## 2) Scope (Fast Delivery)
+## Requirements
 
-- Keep data univariate (demand only) for the first version.
-- Use hourly frequency.
-- Start with:
-	- `p = 168` (last 7 days)
-	- `n = 24` (next 24 hours)
-- Train two models:
-	- Baseline: Logistic Regression
-	- Stronger baseline: Random Forest
+- See `requirements.txt` for Python dependencies.
 
-## 3) Repository Structure
+## Quick start
 
-```
-data/
-	raw/                 # Data pulled from REE API
-	processed/           # Cleaned and model-ready datasets
-notebooks/             # EDA and results storytelling
-src/
-	data/                # Download and dataset assembly
-	features/            # Labeling and sliding-window utilities
-	models/              # Training scripts
-	evaluation/          # Metrics and analysis helpers
-configs/               # Experiment settings
-reports/               # Figures and short result reports
-```
-
-## 4) Pipeline
-
-1. Download REE demand data (`/demanda/evolucion`) across time slices.
-2. Merge and clean into a regular hourly series.
-3. Build incident labels with rolling seasonal threshold.
-4. Create supervised samples with sliding window (`X`: last `p`, `y`: any incident in next `n`).
-5. Split chronologically (train/validation/test).
-6. Train baseline models and evaluate with incident-focused metrics.
-7. Analyze errors and threshold trade-offs.
-
-## 5) Suggested Time Split
-
-- Train: 2021-2023
-- Validation: 2024
-- Test: 2025
-
-Use strict chronological order to avoid leakage.
-
-## 6) Metrics
-
-Focus on metrics robust to class imbalance:
-
-- PR-AUC
-- Recall (incident class)
-- Precision (incident class)
-- F1 (incident class)
-- Confusion matrix
-
-Accuracy is secondary.
-
-## 7) Quick Start
-
-1. Create and activate your Python environment.
-2. Install dependencies:
+1. Create and activate a virtual environment.
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Run dataset creation:
+2. Build the dataset (produces files in `data/processed/`):
 
 ```bash
 python -m src.data.make_dataset
 ```
 
-To exclude known anomaly windows (for example, the Iberia outage), set
-`data.excluded_periods` in `configs/experiment.yaml` with `start` and `end`
-timestamps. These ranges are removed before hourly interpolation and
-window/label generation.
+3. Explore the 'EDA' and 'results' notebooks in the `notebooks/` folder.
 
-4. Train baseline models:
+## Future work
 
-```bash
-python -m src.models.train_baseline
-```
+- Try more advanced models.
+- Turn univariate time-series into multivariate by adding features (weather, calendar, holidays).
+- Packaging for periodic runs and simple deployment.
 
-5. Open notebooks for EDA and result analysis.
-
-## 8) Important Risks and Mitigations
-
-- Label noise: Tune rolling threshold parameters with validation split.
-- Class imbalance: Use class weights and threshold tuning.
-- Leakage: Fit preprocessing on train data only.
-- Missing timestamps: Enforce regular frequency and log imputations.
-
-## 9) Next Steps
-
-- Implement robust API fetching with retries and time slicing.
-- Generate first labeled dataset.
-- Train Logistic Regression baseline and calibrate decision threshold.
-- Compare against Random Forest.
-- Document findings and limitations in a short report.
-
+For details and experiments, see the `notebooks/` folder.
